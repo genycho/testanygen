@@ -1,0 +1,14 @@
+/createUserTest.java
+/createUsersWithArrayInputTest.java
+/createUsersWithListInputTest.java
+/deleteOrderTest.java
+/deleteUserTest.java
+/findPetsByStatusTest.java
+/findPetsByTagsTest.java
+/getInventoryTest.java
+/getOrderByIdTest.java
+/getPetByIdTest.java
+/getUserByNameTest.java
+/logoutUserTest.java
+/placeOrderTest.java
+/updatePetTest.java
