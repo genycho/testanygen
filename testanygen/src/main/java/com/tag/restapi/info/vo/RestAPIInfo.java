@@ -1,6 +1,8 @@
 package com.tag.restapi.info.vo;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RestAPIInfo {
 	
@@ -10,21 +12,44 @@ public class RestAPIInfo {
 //	String description'
 	
 	String hotst;
-	String basePath;
+	String baseURL;
 	String schemes;
 	String consumes;
 	String produces;
 	
 	/*API INFORMATION*/
+	/**	Parent resource group hints*/
+	String apiTag;
+	String apiName;
 	String apiPath;
 	String method;
 	String description;
 	String operationId;
 	List<ParameterInfo> parameters;
-	RequestBody requestBody;
-	List<ResponseInfo> responses;
-	ResponseBody responseBody;
 	
+	String tempRequestBody;
+	
+	RequestBody requestBody;
+	Map<String,ResponseInfo> responses;
+	
+	public String getApiTag() {
+		return apiTag;
+	}
+	public void setApiTag(String apiTag) {
+		this.apiTag = apiTag;
+	}
+	public String getApiName() {
+		return apiName;
+	}
+	public void setApiName(String apiName) {
+		this.apiName = apiName;
+	}
+	public String getBaseURL() {
+		return baseURL;
+	}
+	public void setBaseURL(String baseURL) {
+		this.baseURL = baseURL;
+	}
 	public String getSwaggerVersion() {
 		return swaggerVersion;
 	}
@@ -36,12 +61,6 @@ public class RestAPIInfo {
 	}
 	public void setHotst(String hotst) {
 		this.hotst = hotst;
-	}
-	public String getBasePath() {
-		return basePath;
-	}
-	public void setBasePath(String basePath) {
-		this.basePath = basePath;
 	}
 	public String getSchemes() {
 		return schemes;
@@ -88,6 +107,13 @@ public class RestAPIInfo {
 	public List<ParameterInfo> getParameters() {
 		return parameters;
 	}
+	public void addParameter(ParameterInfo parameter) {
+		if(this.parameters == null) {
+			this.parameters = new ArrayList<>();
+		}
+		this.parameters.add(parameter);
+	}
+	
 	public void setParameters(List<ParameterInfo> parameters) {
 		this.parameters = parameters;
 	}
@@ -97,20 +123,18 @@ public class RestAPIInfo {
 	public void setRequestBody(RequestBody requestBody) {
 		this.requestBody = requestBody;
 	}
-	public List<ResponseInfo> getResponses() {
+	public String getTempRequestBody() {
+		return tempRequestBody;
+	}
+	public void setTempRequestBody(String tempRequestBody) {
+		this.tempRequestBody = tempRequestBody;
+	}
+	public Map<String, ResponseInfo> getResponses() {
 		return responses;
 	}
-	public void setResponses(List<ResponseInfo> responses) {
+	public void setResponses(Map<String, ResponseInfo> responses) {
 		this.responses = responses;
 	}
-	public ResponseBody getResponseBody() {
-		return responseBody;
-	}
-	public void setResponseBody(ResponseBody responseBody) {
-		this.responseBody = responseBody;
-	}
 	
 	
-	
-
 }

@@ -6,6 +6,7 @@ import com.tag.analyzer.RestAPISpecAnalyzer;
 import com.tag.common.TAGException;
 import com.tag.generator.restassured.FreeMarkerGenerator;
 import com.tag.generator.restassured.RestAPITestSuiteVO;
+import com.tag.restapi.info.vo.RestAPIInfo;
 import com.tag.restapi.spec.parser.SwaggerSpecParser;
 
 public class RestAPITestManager {
@@ -16,19 +17,20 @@ public class RestAPITestManager {
 
 	
 	public String analyzeAndGenerate(String yamlSpecFilePath) throws TAGException {
-		 List<RestAPITestSuiteVO> temp = analyzeRestAPITestCase(yamlSpecFilePath);
-		 String resultMessage = this.generateRestAssuredTestFile(temp);
-		return resultMessage;
+//		 List<RestAPIInfo> temp = analyzeRestAPITestCase(yamlSpecFilePath);
+//		 String resultMessage = this.generateRestAssuredTestFile(temp);
+//		return resultMessage;
+		return null;
 	}
 	
-	public List<RestAPITestSuiteVO> analyzeRestAPITestCase(String yamlSpecFilePath) throws TAGException {
-		parser.parse(yamlSpecFilePath);
-		List<RestAPITestSuiteVO> result = parser.analyze(parser.getSwaggerSpecInfo());
-		if (result == null) {
-			throw new TAGException("Failed to analyze REST API SPEC Information.");
-		}
-		return result;
-	}
+//	public List<RestAPITestSuiteVO> analyzeRestAPITestCase(List<RestAPIInfo> temp) throws TAGException {
+//		parser.parse(temp);
+//		List<RestAPITestSuiteVO> result = parser.analyze(parser.getSwaggerSpecInfo());
+//		if (result == null) {
+//			throw new TAGException("Failed to analyze REST API SPEC Information.");
+//		}
+//		return result;
+//	}
 
 	public String generateRestAssuredTestFile(List<RestAPITestSuiteVO> testSuiteList) throws TAGException {
 		analyzer.doTestDesign(testSuiteList);

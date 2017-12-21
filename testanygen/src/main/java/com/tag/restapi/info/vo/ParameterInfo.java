@@ -39,4 +39,11 @@ public class ParameterInfo {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	public String getRequired() {
+		return required;
+	}
+	public void setRequired(String required) {
+		this.required = required;
+	}
+	
 }

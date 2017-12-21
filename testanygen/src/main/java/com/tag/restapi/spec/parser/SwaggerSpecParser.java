@@ -7,19 +7,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.tag.common.TAGException;
-import com.tag.generator.restassured.RestAPIParameterVO;
-import com.tag.generator.restassured.RestAPIResponseVO;
-import com.tag.generator.restassured.RestAPITestSuiteVO;
+import com.tag.restapi.info.vo.ParameterInfo;
+import com.tag.restapi.info.vo.RequestBody;
+import com.tag.restapi.info.vo.ResponseInfo;
 import com.tag.restapi.info.vo.RestAPIInfo;
 
-import io.swagger.annotations.Tag;
-import io.swagger.models.Info;
-import io.swagger.models.Model;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.properties.Property;
 import io.swagger.parser.SwaggerParser;
 
 /**
@@ -29,54 +28,21 @@ import io.swagger.parser.SwaggerParser;
  *
  */
 public class SwaggerSpecParser implements ISpecParser{
-	Swagger swaggerSpecInfo = null;
 	
-	public Swagger parse(String yamlFilePath) {
+	private List<ParameterInfo> bodyParameterList = new ArrayList<>();
+	
+	public Swagger parse(String specFilePath) {
 		SwaggerParser parser = new SwaggerParser(); 
-		return swaggerSpecInfo = parser.read(yamlFilePath); 
-	}
-	
-	public List<RestAPIInfo> parse(Swagger swaggerInfo) {
-//		여기서 열심히 꺼내서 열심히 데이터 담기
-
-		List<RestAPIInfo> apiList = new ArrayList<>();
-		
-		String basePath = swaggerInfo.getBasePath();
-		List<String> cosumeList = swaggerInfo.getConsumes();//
-		Map<String, Model> definitions = swaggerInfo.getDefinitions();
-		String host = swaggerInfo.getHost();
-		List<io.swagger.models.Tag> tagList = swaggerInfo.getTags();
-		Info docInfo = swaggerInfo.getInfo();
-		//1. 
-		
-		
-		//2. 
-		
-		
-		//3. 
-		
-		
-		//4. 
-		
-		
-		//5. 
-		
-		
-		
-		return apiList; 
-	}
-	
-
-	public Swagger getSwaggerSpecInfo() {
-		return swaggerSpecInfo;
+		return parser.read(specFilePath); 
 	}
 	
 	/*
 	 * Swagger 스펙의 정보 데이터 구조는
 	 * http://openapi-specification-visual-documentation.apihandyman.io 참조 함
 	 */
-	public List<RestAPITestSuiteVO> analyze(Swagger swaggerInfo) throws TAGException {
-		//TODO	각 오브젝트들,응답바디, 에러바디 에 대한 정의가 담겨 있으며 각 API 명세에서 상대경로로 참조됨 ($ref:'#/definitions/Activities')	
+	public List<RestAPIInfo> parse(Swagger swaggerInfo) throws TAGException {
+		//TODO	각 오브젝트들,응답바디, 에러바디 에 대한 정의가 담겨 있으며 각 API 명세에서 상대경로로 참조됨 ($ref:'#/definitions/Activities')
+		//TODO	글로벌, 공통 응답코드는 같이 작성되어 있지 않음. 개별 API에서 이 정보를 알 필요가 있을지... 
 //		Map<String, Model> modelMap = swaggerInfo.getDefinitions();// -> 테스트 데이터 생성에 관련된 거면 XXModelFactory 형태의 코드로 생성되도록 처리한다
 
 		/** 전체에 대한 title, description, termsOfService, contact, license, version,... */
@@ -84,11 +50,13 @@ public class SwaggerSpecParser implements ISpecParser{
 //		swaggerInfo.getResponses();//An object to hold responses that can be used across operations. This property does not define global responses for all operations
 //		swaggerInfo.getParameters();//An object to hold parameters that can be used across operations. This property does not define global parameters for all operations
 //		swaggerInfo.getSchemes();		// https, http,
-		
+		if(!"2.0".equals(swaggerInfo.getSwagger())){
+			throw new TAGException("Not supported SPEC version - "+swaggerInfo.getSwagger());
+		}
 		Map<String, Path> pathModelMap = swaggerInfo.getPaths();
 		String baseUrl = getBaseURL(swaggerInfo);
 		
-		List<RestAPITestSuiteVO> testSuiteList = new ArrayList<>();
+		List<RestAPIInfo> restAPIInfoList = new ArrayList<>();
 		int countMethods = 0;
 		for (String aPath : pathModelMap.keySet()) {
 			countMethods = 0;
@@ -98,22 +66,22 @@ public class SwaggerSpecParser implements ISpecParser{
 			}
 			if (pathModelMap.get(aPath).getGet() != null) {
 				countMethods++;
-				testSuiteList.add(getOperationTestSuite(baseUrl, aPath, "get", pathModelMap.get(aPath).getGet()));
+				restAPIInfoList.add(getRestAPIInfo(baseUrl, aPath, "get", pathModelMap.get(aPath).getGet()));
 			} 
 			
 			if (pathModelMap.get(aPath).getPost() != null) {
 				countMethods++;
-				testSuiteList.add(getOperationTestSuite(baseUrl, aPath, "post", pathModelMap.get(aPath).getPost()));
+				restAPIInfoList.add(getRestAPIInfo(baseUrl, aPath, "post", pathModelMap.get(aPath).getPost()));
 			} 
 			
 			if (pathModelMap.get(aPath).getPut() != null) {
 				countMethods++;
-				testSuiteList.add(getOperationTestSuite(baseUrl, aPath, "put", pathModelMap.get(aPath).getPut()));
+				restAPIInfoList.add(getRestAPIInfo(baseUrl, aPath, "put", pathModelMap.get(aPath).getPut()));
 			} 
 
 			if (pathModelMap.get(aPath).getDelete() != null) {
 				countMethods++;
-				testSuiteList.add(getOperationTestSuite(baseUrl, aPath, "delete", pathModelMap.get(aPath).getDelete()));
+				restAPIInfoList.add(getRestAPIInfo(baseUrl, aPath, "delete", pathModelMap.get(aPath).getDelete()));
 			} 
 			
 			if (pathModelMap.get(aPath).getPatch() != null) {
@@ -126,25 +94,76 @@ public class SwaggerSpecParser implements ISpecParser{
 				throw new TAGException("There is no any methods for the path: "+aPath);
 			}
 		}
-		return testSuiteList;
+		return restAPIInfoList;
 	}
 	
-	private RestAPITestSuiteVO getOperationTestSuite(String baseUrl, String aPath, String methodType, Operation operation){
-		RestAPITestSuiteVO testSuiteVO = new RestAPITestSuiteVO();
-		testSuiteVO.setBaseURL(baseUrl);
-		testSuiteVO.setInputParameters(getInputParameterInfo(operation.getParameters()));
-		testSuiteVO.setMethodType(methodType);
-		testSuiteVO.setPath(aPath);
+	private String generateAPIName(final String aPath, final String methodType, final Operation operation) {
+		if(operation.getOperationId() != null) {
+			return operation.getOperationId();
+		}
+		
+		if(operation.getSummary() != null ) {
+			return operation.getSummary();
+		}
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append(methodType);
+		sb.append(aPath.replace("/","_"));
+		return sb.toString();
+	}
+	
+	/**	analyze api information from swagger's OPERATION model	
+	 * @throws TAGException */
+	private RestAPIInfo getRestAPIInfo(String baseUrl, String aPath, String methodType, Operation operation) throws TAGException{
+		RestAPIInfo restAPIInfo = new RestAPIInfo();//apiName - methodType, aPath에서 / 제거하고?
+		restAPIInfo.setApiName(generateAPIName(aPath, methodType, operation));
+		
+		restAPIInfo.setBaseURL(baseUrl);
+		
+		if(operation.getParameters() != null) {
+			for(Parameter inputParameter : operation.getParameters()) {
+				if("query".equals(inputParameter.getIn())){
+					restAPIInfo.addParameter(getInputParameter(inputParameter));
+				}else if("path".equals(inputParameter.getIn())){
+					restAPIInfo.addParameter(getInputParameter(inputParameter));
+				}else if("body".equals(inputParameter.getIn())){
+					restAPIInfo.setRequestBody(getRequestBody(inputParameter, bodyParameterList));
+				}else {
+					throw new TAGException("Not yet support in-type parameter");
+				}
+//				restAPIInfo.setParameters(getInputParameterInfo(operation.getParameters()));
+			}
+		}
+		restAPIInfo.setMethod(methodType);
+		restAPIInfo.setApiPath(aPath);
 		//TODO	Description 정리 
-		testSuiteVO.setDescription(operation.getDescription() + "\n"+operation.getSummary());
-		testSuiteVO.setResponsesMap(getResponseInfo(operation.getResponses()));
-		testSuiteVO.setName((operation.getOperationId()==null?operation.getSummary():operation.getOperationId()));
-		testSuiteVO.setTargetName(testSuiteVO.getName());
-		testSuiteVO.setTargetPackage(getResourceGroup(operation.getTags()));
-		testSuiteVO.setAcceptType(getAccepType(operation.getProduces()));
-		return testSuiteVO;
+		restAPIInfo.setDescription(operation.getDescription() + "\n"+operation.getSummary());
+		restAPIInfo.setResponses(getResponseInfo(operation.getResponses()));
+		restAPIInfo.setApiTag(getResourceGroup(operation.getTags()));
+		return restAPIInfo;
 	}
 	
+	private RequestBody getRequestBody(Parameter inputParameter, List<ParameterInfo> bodyParameterList2) {
+		//TODO
+		BodyParameter requestBody = (BodyParameter) inputParameter;
+		requestBody.getSchema();
+		return null;
+	}
+
+	private ParameterInfo getInputParameter(Parameter inputParameter) {
+		//io.swagger.models.parameters.QueryParameter
+		//io.swagger.models.parameters.PathParameter
+		ParameterInfo parameterInfo = new ParameterInfo();
+		parameterInfo.setDescription(inputParameter.getDescription());
+//		parameterInfo.setFormat(inputParameter.get);
+		parameterInfo.setInType(inputParameter.getIn());
+		parameterInfo.setName(inputParameter.getName());
+		parameterInfo.setRequired(String.valueOf(inputParameter.getRequired()));
+//		parameterInfo.setType(inputParameter.getVendorExtensions().);
+		return parameterInfo;
+	}
+
+	/**	get API's parent resource group hint from... */
 	private String getResourceGroup(List<String> tags) {
 		if(tags!=null && tags.size() >0) {
 			return tags.get(0);
@@ -152,7 +171,8 @@ public class SwaggerSpecParser implements ISpecParser{
 		return null;
 	}
 
-	private String getAccepType(List<String> produces) {
+	/**	get responses's type - eg)application/xml, application/json*/
+	private String getAcceptType(List<String> produces) {
 		if(produces!=null && produces.size() >0) {
 			return produces.get(0);
 		}
@@ -162,7 +182,7 @@ public class SwaggerSpecParser implements ISpecParser{
 
 	private String getBaseURL(Swagger swaggerInfo) {
 		StringBuffer sb = new StringBuffer();
-		if(swaggerInfo.getSchemes() !=null && swaggerInfo.getSchemes().size() >0) {
+		if(swaggerInfo.getSchemes() !=null && swaggerInfo.getSchemes().size() > 0) {
 			//TODO	여러 건인 경우 처리
 			sb.append(swaggerInfo.getSchemes().get(0).toString().toLowerCase());
 			sb.append("://");
@@ -178,33 +198,44 @@ public class SwaggerSpecParser implements ISpecParser{
 		return sb.toString();
 	}
 
-	private Map<String, RestAPIResponseVO> getResponseInfo(Map<String, Response> responses) {
+	private Map<String, ResponseInfo> getResponseInfo(Map<String, Response> responses) {
 		// TODO
 		// responses TreeMap이 2개. 200키, value에 Response 객체가 들어있고,
 		if(responses == null) {
 			return null;
 		}
-		Map<String, RestAPIResponseVO> responsesMap = new HashMap();
-		for(Entry<String, Response> swaggerResponse : responses.entrySet()) {
-			Response response = swaggerResponse.getValue();
-//			response.getDescription();
-//			response.getExamples();
-			RestAPIResponseVO responseVO = new RestAPIResponseVO();
-			responseVO.setResponseCode(swaggerResponse.getKey());
+		Map<String, ResponseInfo> responsesMap = new HashMap<String, ResponseInfo>();
+//		for(Entry<String, Response> swaggerResponse : responses.entrySet()) {
+		for(String aKey : responses.keySet()) {
+			Response response = responses.get(aKey);
+			ResponseInfo responseVO = new ResponseInfo();
+			responseVO.setStatusCode(aKey);
 			responseVO.setDescription(response.getDescription());
-			responsesMap.put(swaggerResponse.getKey(), responseVO);
+			//TODO
+			if(response.getSchema() != null) {
+				responseVO.setTempResponseValue(response.getSchema().getType() + "..."+response.getSchema().getName());
+			}
+			
+			responsesMap.put(aKey, responseVO);
+//			Property responseProperty = responses.get(aKey).getSchema();
+//			StringBuffer sb = new StringBuffer();
+//			sb.append(responseProperty.getType());
+//			sb.append(responseProperty.get);
+//			sb.append(responseProperty.getType());
+//			sb.append(responseProperty.getType());
+//			sb.append(responseProperty.getType());
 		}
 		return responsesMap;
 	}
 
-	private List<RestAPIParameterVO> getInputParameterInfo(List<Parameter> list) {
+	private List<ParameterInfo> getInputParameterInfo(List<Parameter> list) {
 		//TODO
 		if(list == null) {
 			return null;
 		}
-		List<RestAPIParameterVO> parameterList = new ArrayList<>();
+		List<ParameterInfo> parameterList = new ArrayList<>();
 		for(Parameter swaggerParameter : list) {
-			RestAPIParameterVO parameterVO = new RestAPIParameterVO();
+			ParameterInfo parameterVO = new ParameterInfo();
 			parameterVO.setName(swaggerParameter.getName());
 			parameterVO.setRequired(String.valueOf(swaggerParameter.getRequired()));
 			parameterVO.setDescription(swaggerParameter.getDescription());
@@ -215,7 +246,7 @@ public class SwaggerSpecParser implements ISpecParser{
 				//path
 				//formData
 				//body
-				parameterVO.setCategory("request::query");
+//				parameterVO.setCategory("request::query");
 //				parameterVO.setType(swaggerParameter.);
 //				parameterVO.setFormat(format);
 			}
@@ -226,27 +257,4 @@ public class SwaggerSpecParser implements ISpecParser{
 		return parameterList;
 	}
 
-	/**
-	 * /products, get:
-	 * summary: Product Types description: |~
-	 * @param methodType
-	 * @param apiPath
-	 * @return
-	 */
-	private RestAPITestSuiteVO getAPIInfo(String apiPath, String methodType, Path anApiPath) {
-		// anApiPath.
-		RestAPITestSuiteVO restAPITestSuiteVO = new RestAPITestSuiteVO();
-
-		// restAPITestSuiteVO.setDescription(description);
-		// restAPITestSuiteVO.setExpectedResult(expectedResult);
-		// restAPITestSuiteVO.setInputParameters(inputParameters);
-		// restAPITestSuiteVO.setMethodType(methodType);
-		// restAPITestSuiteVO.setName(name);
-		// restAPITestSuiteVO.setPath(path);
-		// restAPITestSuiteVO.setPort(port);
-		// restAPITestSuiteVO.setTestCaseType(testCaseType); //Not yet
-
-		return restAPITestSuiteVO;
-	}
-	
 }
