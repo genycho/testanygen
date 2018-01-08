@@ -15,7 +15,7 @@ public class TestSuiteVO {
 	private List<TestCaseVO> testCaseList;
 
 	public String getTargetName() {
-		return targetName;
+			return targetName;	
 	}
 
 	public void setTargetName(String targetName) {
@@ -38,6 +38,9 @@ public class TestSuiteVO {
 	}
 
 	public String getTargetPackage() {
+		if(targetPackage==null) {
+			return "restapi";
+		}
 		return targetPackage;
 	}
 

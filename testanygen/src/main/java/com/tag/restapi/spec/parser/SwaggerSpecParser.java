@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.tag.common.TAGException;
-import com.tag.restapi.info.vo.ParameterInfo;
-import com.tag.restapi.info.vo.RequestBody;
-import com.tag.restapi.info.vo.ResponseInfo;
-import com.tag.restapi.info.vo.RestAPIInfo;
+import com.tag.restapi.spec.vo.ParameterInfo;
+import com.tag.restapi.spec.vo.RequestBody;
+import com.tag.restapi.spec.vo.ResponseInfo;
+import com.tag.restapi.spec.vo.RestAPIInfo;
 
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
@@ -18,7 +17,6 @@ import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
-import io.swagger.models.properties.Property;
 import io.swagger.parser.SwaggerParser;
 
 /**
@@ -31,7 +29,11 @@ public class SwaggerSpecParser implements ISpecParser{
 	
 	private List<ParameterInfo> bodyParameterList = new ArrayList<>();
 	
-	public Swagger parse(String specFilePath) {
+	public  List<RestAPIInfo> parse(String specFilePath) throws TAGException {
+		return parse(parseSpecFile(specFilePath));
+	}
+	
+	public Swagger parseSpecFile(String specFilePath) {
 		SwaggerParser parser = new SwaggerParser(); 
 		return parser.read(specFilePath); 
 	}
@@ -129,7 +131,7 @@ public class SwaggerSpecParser implements ISpecParser{
 				}else if("body".equals(inputParameter.getIn())){
 					restAPIInfo.setRequestBody(getRequestBody(inputParameter, bodyParameterList));
 				}else {
-					throw new TAGException("Not yet support in-type parameter");
+					throw new TAGException("Not yet supporting type!! - " + inputParameter.getIn());
 				}
 //				restAPIInfo.setParameters(getInputParameterInfo(operation.getParameters()));
 			}

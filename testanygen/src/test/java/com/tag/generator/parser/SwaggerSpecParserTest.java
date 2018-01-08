@@ -2,7 +2,6 @@ package com.tag.generator.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -12,13 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.tag.common.TagUtils;
-import com.tag.generator.restassured.RestAPITestSuiteVO;
-import com.tag.restapi.info.vo.RestAPIInfo;
 import com.tag.restapi.spec.parser.SwaggerSpecParser;
+import com.tag.restapi.spec.vo.RestAPIInfo;
 
 import io.swagger.models.Swagger;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.parser.SwaggerParser;
 
 public class SwaggerSpecParserTest {
 	SwaggerSpecParser target;
@@ -35,14 +31,14 @@ public class SwaggerSpecParserTest {
 	@Test
 	public void testParse() throws Exception {
 		String filePath = TagUtils.getCurrentPath()+"/test_resources/uber_sample.yaml";
-		Swagger swaggerSpec = target.parse(filePath);
+		Swagger swaggerSpec = target.parseSpecFile(filePath);
 		assertNotNull(swaggerSpec);
 	}
 	
 	@Test
 	public void testParsePetStoreSpec() throws Exception {
 		String filePath = TagUtils.getCurrentPath()+"/test_resources/petstore_sample.json";
-		Swagger swaggerInfo = target.parse(filePath);
+		Swagger swaggerInfo = target.parseSpecFile(filePath);
 		List<RestAPIInfo> resultList = target.parse(swaggerInfo);
 		assertNotNull(resultList);
 		assertEquals(4,resultList.size());
@@ -53,7 +49,7 @@ public class SwaggerSpecParserTest {
 	@Test
 	public void testParseUberJSONSpec() throws Exception {
 		String filePath = TagUtils.getCurrentPath()+"/test_resources/uber_sample.json";
-		Swagger swaggerInfo = target.parse(filePath);
+		Swagger swaggerInfo = target.parseSpecFile(filePath);
 		List<RestAPIInfo> resultList = target.parse(swaggerInfo);
 		assertNotNull(resultList);
 		assertEquals(5,resultList.size());
@@ -65,7 +61,7 @@ public class SwaggerSpecParserTest {
 		assertEquals("https://api.uber.com/v1", firstAPIInfo.getBaseURL());
 		assertEquals(null, firstAPIInfo.getConsumes());
 		assertTrue(firstAPIInfo.getDescription().startsWith("The Products endpoint returns information about the Uber products "));
-		assertEquals(null, firstAPIInfo.getHotst());
+		assertEquals(null, firstAPIInfo.getHost());
 		assertEquals("get", firstAPIInfo.getMethod());
 		assertEquals(null, firstAPIInfo.getOperationId());
 //		assertEquals("", firstAPIInfo.getParameters());
@@ -85,7 +81,7 @@ public class SwaggerSpecParserTest {
 	@Test
 	public void testParseForUberYamlParser() throws Exception {
 		String filePath = TagUtils.getCurrentPath()+"/test_resources/uber_sample.yaml";
-		Swagger swaggerInfo = target.parse(filePath);
+		Swagger swaggerInfo = target.parseSpecFile(filePath);
 		List<RestAPIInfo> resultList = target.parse(swaggerInfo);
 		assertNotNull(resultList);
 		assertEquals(5,resultList.size());

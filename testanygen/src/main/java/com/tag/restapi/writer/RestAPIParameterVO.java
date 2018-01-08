@@ -1,4 +1,4 @@
-package com.tag.generator.restassured;
+package com.tag.restapi.writer;
 
 /**
  * 

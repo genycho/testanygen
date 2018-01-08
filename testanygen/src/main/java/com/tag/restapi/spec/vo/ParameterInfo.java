@@ -1,4 +1,4 @@
-package com.tag.restapi.info.vo;
+package com.tag.restapi.spec.vo;
 
 public class ParameterInfo {
 	String name;

@@ -1,4 +1,4 @@
-package com.tag.analyzer;
+package com.tag.common;
 
 import java.io.File;
 

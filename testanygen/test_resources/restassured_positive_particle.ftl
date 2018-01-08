@@ -1,9 +1,9 @@
 	@Test
-	public void test${testSuiteVO.targetName}_${testCaseVO.name}() throws Exception {
+	public void test${testCaseVO.name}() throws Exception {
 		
 		JSONObject inputJSON = null;//TODO	TestDataPrepare
 		
-		RequestSpecification requestSpec = getDefaultBasicRequestSpec("Authrization", 
+		RequestSpecification requestSpec = getDefaultBasicRequestSpec("Authorization", 
 				inputJSON.toJSONString());
 		requestSpec.log().all();
 		

@@ -1,6 +1,7 @@
-package com.tag.restapi.info.vo;
+package com.tag.restapi.spec.vo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ public class RestAPIInfo {
 //	String title;
 //	String description'
 	
-	String hotst;
+	String host;
 	String baseURL;
 	String schemes;
 	String consumes;
@@ -56,11 +57,12 @@ public class RestAPIInfo {
 	public void setSwaggerVersion(String swaggerVersion) {
 		this.swaggerVersion = swaggerVersion;
 	}
-	public String getHotst() {
-		return hotst;
+	
+	public String getHost() {
+		return host;
 	}
-	public void setHotst(String hotst) {
-		this.hotst = hotst;
+	public void setHost(String host) {
+		this.host = host;
 	}
 	public String getSchemes() {
 		return schemes;
@@ -136,5 +138,13 @@ public class RestAPIInfo {
 		this.responses = responses;
 	}
 	
+	public void addResponseMap(String responseCode, ResponseInfo response) {
+		//TODO	현재는 같은 status code에 여러 응답을 추가하면 Map의 키로 덮어 쓰는데... 이를 별도로 식별할지 고민 필요...
+		//swagger 의 데이터 모델에서의 키는 ... 
+		if(this.responses ==null) {
+			this.responses = new HashMap<>();
+		}
+		this.responses.put(responseCode, response);
+	}
 	
 }
