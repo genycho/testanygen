@@ -1,11 +1,14 @@
 package com.tag.restapi.writer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 
  *
  */
 public class RestAPIParameterVO {
-	String category;//path, query, Input(request body), Output(response), 
+	String inType;//path, query, Input(request body), Output(response), 
 	String name;
 	String description;
 	String required;	//true/false
@@ -14,13 +17,15 @@ public class RestAPIParameterVO {
 	
 	String defaultValue;
 	String value;
+	
+	List<RestAPIParameterVO> subParameterList = null;
 
-	public String getCategory() {
-		return category;
+	public String getInType() {
+		return inType;
 	}
 
-	public void setCategory(String category) {
-		this.category = category;
+	public void setInType(String inType) {
+		this.inType = inType;
 	}
 
 	public String getName() {
@@ -78,6 +83,20 @@ public class RestAPIParameterVO {
 	public void setFormat(String format) {
 		this.format = format;
 	}
+
+	public List<RestAPIParameterVO> getSubParameterList() {
+		return subParameterList;
+	}
+
+	public void setSubParameterList(List<RestAPIParameterVO> subParameterList) {
+		this.subParameterList = subParameterList;
+	}
 	
+	public void addSubParameter(RestAPIParameterVO subParameter) {
+		if(this.subParameterList == null) {
+			this.subParameterList = new ArrayList<>();
+		}
+		this.subParameterList.add(subParameter);
+	}
 	
 }

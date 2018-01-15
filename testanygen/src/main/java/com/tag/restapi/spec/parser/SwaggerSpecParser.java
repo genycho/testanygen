@@ -5,18 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tag.common.TAGException;
 import com.tag.restapi.spec.vo.ParameterInfo;
 import com.tag.restapi.spec.vo.RequestBody;
 import com.tag.restapi.spec.vo.ResponseInfo;
 import com.tag.restapi.spec.vo.RestAPIInfo;
 
+import io.swagger.models.Model;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.QueryParameter;
 import io.swagger.parser.SwaggerParser;
 
 /**
@@ -26,8 +32,9 @@ import io.swagger.parser.SwaggerParser;
  *
  */
 public class SwaggerSpecParser implements ISpecParser{
+	final Logger logger = LoggerFactory.getLogger(SwaggerSpecParser.class);
 	
-	private List<ParameterInfo> bodyParameterList = new ArrayList<>();
+	private Map<String, RequestBody> bodyModelMap = new HashMap<>(); 
 	
 	public  List<RestAPIInfo> parse(String specFilePath) throws TAGException {
 		return parse(parseSpecFile(specFilePath));
@@ -60,6 +67,8 @@ public class SwaggerSpecParser implements ISpecParser{
 		
 		List<RestAPIInfo> restAPIInfoList = new ArrayList<>();
 		int countMethods = 0;
+		
+		//1. 개별 API에 대한 분석 결과 가져오기 
 		for (String aPath : pathModelMap.keySet()) {
 			countMethods = 0;
 
@@ -96,6 +105,11 @@ public class SwaggerSpecParser implements ISpecParser{
 				throw new TAGException("There is no any methods for the path: "+aPath);
 			}
 		}
+		//TODO	2. 데이터 모델에 대한 분석 결과 가져오기
+		;
+		for(String modelKey : swaggerInfo.getDefinitions().keySet()) {
+			this.bodyModelMap.put(modelKey, comvertModelToRequestBody(modelKey, swaggerInfo.getDefinitions().get(modelKey)));
+		}
 		return restAPIInfoList;
 	}
 	
@@ -125,15 +139,17 @@ public class SwaggerSpecParser implements ISpecParser{
 		if(operation.getParameters() != null) {
 			for(Parameter inputParameter : operation.getParameters()) {
 				if("query".equals(inputParameter.getIn())){
-					restAPIInfo.addParameter(getInputParameter(inputParameter));
+					restAPIInfo.addParameter(getQueryParameter((QueryParameter) inputParameter));
 				}else if("path".equals(inputParameter.getIn())){
-					restAPIInfo.addParameter(getInputParameter(inputParameter));
+					restAPIInfo.addParameter(getPathParameter((PathParameter) inputParameter));
 				}else if("body".equals(inputParameter.getIn())){
-					restAPIInfo.setRequestBody(getRequestBody(inputParameter, bodyParameterList));
+					//FIXME
+					BodyParameter temp = (BodyParameter)inputParameter;
+					restAPIInfo.setTempRequestBody(temp.getSchema().getReference());
+					restAPIInfo.addParameter(getBodyParameter((BodyParameter) inputParameter));
 				}else {
 					throw new TAGException("Not yet supporting type!! - " + inputParameter.getIn());
 				}
-//				restAPIInfo.setParameters(getInputParameterInfo(operation.getParameters()));
 			}
 		}
 		restAPIInfo.setMethod(methodType);
@@ -145,23 +161,36 @@ public class SwaggerSpecParser implements ISpecParser{
 		return restAPIInfo;
 	}
 	
-	private RequestBody getRequestBody(Parameter inputParameter, List<ParameterInfo> bodyParameterList2) {
-		//TODO
-		BodyParameter requestBody = (BodyParameter) inputParameter;
-		requestBody.getSchema();
-		return null;
-	}
-
-	private ParameterInfo getInputParameter(Parameter inputParameter) {
-		//io.swagger.models.parameters.QueryParameter
-		//io.swagger.models.parameters.PathParameter
+	private ParameterInfo getQueryParameter(QueryParameter inputParameter) {
 		ParameterInfo parameterInfo = new ParameterInfo();
 		parameterInfo.setDescription(inputParameter.getDescription());
-//		parameterInfo.setFormat(inputParameter.get);
+		parameterInfo.setFormat(inputParameter.getFormat());
+		parameterInfo.setInType(inputParameter.getIn());
+		parameterInfo.setName(inputParameter.getName());
+		parameterInfo.setRequired(String.valueOf(inputParameter.getRequired()));
+		parameterInfo.setType(inputParameter.getType());
+		return parameterInfo;
+	}
+	
+	private ParameterInfo getPathParameter(PathParameter inputParameter) {
+		ParameterInfo parameterInfo = new ParameterInfo();
+		parameterInfo.setDescription(inputParameter.getDescription());
+		parameterInfo.setFormat(inputParameter.getFormat());
+		parameterInfo.setInType(inputParameter.getIn());
+		parameterInfo.setName(inputParameter.getName());
+		parameterInfo.setRequired(String.valueOf(inputParameter.getRequired()));
+		parameterInfo.setType(inputParameter.getType());
+		return parameterInfo;
+	}
+	
+	private ParameterInfo getBodyParameter(BodyParameter inputParameter) {
+		ParameterInfo parameterInfo = new ParameterInfo();
+		parameterInfo.setDescription(inputParameter.getDescription());
 		parameterInfo.setInType(inputParameter.getIn());
 		parameterInfo.setName(inputParameter.getName());
 		parameterInfo.setRequired(String.valueOf(inputParameter.getRequired()));
 //		parameterInfo.setType(inputParameter.getVendorExtensions().);
+		parameterInfo.setRefBodyModelKey(inputParameter.getSchema().getReference());
 		return parameterInfo;
 	}
 
@@ -199,6 +228,20 @@ public class SwaggerSpecParser implements ISpecParser{
 		
 		return sb.toString();
 	}
+	
+	/**
+	 * #/definitions/
+	 * @param model
+	 * @return
+	 */
+	private RequestBody comvertModelToRequestBody(String modelKey, Model model) {
+		RequestBody tempBody = new RequestBody();
+		tempBody.setModelKey(modelKey);
+//		for(String modelKey : model.getProperties().keySet()) {
+//			tempBody.
+//		}
+		return tempBody;
+	}
 
 	private Map<String, ResponseInfo> getResponseInfo(Map<String, Response> responses) {
 		// TODO
@@ -229,34 +272,4 @@ public class SwaggerSpecParser implements ISpecParser{
 		}
 		return responsesMap;
 	}
-
-	private List<ParameterInfo> getInputParameterInfo(List<Parameter> list) {
-		//TODO
-		if(list == null) {
-			return null;
-		}
-		List<ParameterInfo> parameterList = new ArrayList<>();
-		for(Parameter swaggerParameter : list) {
-			ParameterInfo parameterVO = new ParameterInfo();
-			parameterVO.setName(swaggerParameter.getName());
-			parameterVO.setRequired(String.valueOf(swaggerParameter.getRequired()));
-			parameterVO.setDescription(swaggerParameter.getDescription());
-			if("query".equals(swaggerParameter.getIn())){
-				//TODO, FIXME
-				//query
-				//header
-				//path
-				//formData
-				//body
-//				parameterVO.setCategory("request::query");
-//				parameterVO.setType(swaggerParameter.);
-//				parameterVO.setFormat(format);
-			}
-//			parameterVO.setDefaultValue(defaultValue);
-//			parameterVO.setValue(value);
-			parameterList.add(parameterVO);
-		}
-		return parameterList;
-	}
-
 }

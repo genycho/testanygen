@@ -4,8 +4,10 @@ import java.util.Map.Entry;
 
 import com.tag.common.PropertiesPool;
 import com.tag.common.TAGException;
+import com.tag.restapi.spec.vo.ParameterInfo;
 import com.tag.restapi.spec.vo.ResponseInfo;
 import com.tag.restapi.spec.vo.RestAPIInfo;
+import com.tag.restapi.writer.RestAPIParameterVO;
 import com.tag.restapi.writer.RestAPITestCaseVO;
 import com.tag.restapi.writer.RestAPITestSuiteVO;
 
@@ -83,7 +85,18 @@ public class RestAPISpecAnalyzer implements ISpecAnalyzer {
 		testSuiteVO.setTargetName(restAPIInfo.getApiName());
 		testSuiteVO.setTargetPackage(restAPIInfo.getApiTag());
 	}
-			
+
+	private RestAPIParameterVO generateTestInput(String testType, ParameterInfo inputParameter) {
+		RestAPIParameterVO restAPIParameterVO = new RestAPIParameterVO();
+		restAPIParameterVO.setName(inputParameter.getName());
+		restAPIParameterVO.setDescription(inputParameter.getDescription());
+		restAPIParameterVO.setFormat(inputParameter.getFormat());
+		restAPIParameterVO.setRequired(inputParameter.getRequired());
+		restAPIParameterVO.setType(inputParameter.getType());
+		restAPIParameterVO.setDefaultValue(inputParameter.getDefaultValue());
+		//TODO	디폴트 값이 없는 경우는 Type에 따라 Integer, String 등등등을 임의로 보고 값 생성해 주는 기능 
+		return restAPIParameterVO;
+	}
 
 	/**
 	 * 기본 케이스를 생성하는 메소드. Input TestSute의 TestCase가 최초에는 비어있지만 분석 후에는 </br>
@@ -103,6 +116,14 @@ public class RestAPISpecAnalyzer implements ISpecAnalyzer {
 		firstTestCaseVO.setExpectedResult("정상수행, 선택 입력 값들이 디폴트 값으로 동작하는지 확인합니다");
 		testSuite.addTestCase(firstTestCaseVO);
 
+		if(restAPIInfo.getParameters() != null) {
+			for(ParameterInfo inputParameter : restAPIInfo.getParameters()) {
+				if("true".equalsIgnoreCase(inputParameter.getRequired())) {
+					firstTestCaseVO.addInputParameter(generateTestInput("positive", inputParameter));
+				}
+			}
+		}
+		
 		if(restAPIInfo.getParameters() !=null && restAPIInfo.getParameters().size() > 1) {
 			RestAPITestCaseVO secondTestCaseVO = new RestAPITestCaseVO();
 			secondTestCaseVO.setDescription("All input parameters tests( mandatory & optional parameters). 선택 입력 값들이 디폴트 값이 아닌 선택한 값으로 동작하는지 확인합니다");
@@ -111,6 +132,12 @@ public class RestAPISpecAnalyzer implements ISpecAnalyzer {
 			secondTestCaseVO.setTestCaseType(RestAPITestCaseVO.RESTTCTYPE_200OK);
 			secondTestCaseVO.setGeneratedTestLevel(1);
 			testSuite.addTestCase(secondTestCaseVO);
+			
+			if(restAPIInfo.getParameters() != null) {
+				for(ParameterInfo inputParameter : restAPIInfo.getParameters()) {
+						secondTestCaseVO.addInputParameter(generateTestInput("positive", inputParameter));
+				}
+			}
 		}
 	}
 	

@@ -31,7 +31,7 @@ public class RestAPITestManager {
 		for(RestAPIInfo restAPIInfo : restAPIInfoList) {
 			try {
 				RestAPITestSuiteVO testSuite = analyzer.analyze(restAPIInfo);
-				String generateFilePath = generator.generate(testSuite);
+				String generateFilePath = generator.generateRestAssured(testSuite);
 				generatedCount++;
 				returnMsg.append(generateFilePath);
 				returnMsg.append(",");

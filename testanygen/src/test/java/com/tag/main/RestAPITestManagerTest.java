@@ -2,9 +2,11 @@ package com.tag.main;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.tag.common.PropertiesPool;
+import com.tag.common.TAGException;
 import com.tag.common.TestUtils;
 
 public class RestAPITestManagerTest {
@@ -19,7 +21,8 @@ public class RestAPITestManagerTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
+	//@Test//지원하지 않는 데이터 타입 formData가 포함되어 있어 에러 발생하는 데이터
+	@Test(expected=TAGException.class)
 	public void testAnalyzeAndGenerateForyaml() throws Exception {
 		PropertiesPool.setOutputPath(TestUtils.getCurrentPath()+"/test_result");
 		PropertiesPool.setTemplatePath(TestUtils.getCurrentPath()+"/test_resources");

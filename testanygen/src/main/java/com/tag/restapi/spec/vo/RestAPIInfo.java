@@ -30,7 +30,9 @@ public class RestAPIInfo {
 	
 	String tempRequestBody;
 	
-	RequestBody requestBody;
+	//TODO
+//	RequestBody requestBody;
+	
 	Map<String,ResponseInfo> responses;
 	
 	public String getApiTag() {
@@ -118,12 +120,6 @@ public class RestAPIInfo {
 	
 	public void setParameters(List<ParameterInfo> parameters) {
 		this.parameters = parameters;
-	}
-	public RequestBody getRequestBody() {
-		return requestBody;
-	}
-	public void setRequestBody(RequestBody requestBody) {
-		this.requestBody = requestBody;
 	}
 	public String getTempRequestBody() {
 		return tempRequestBody;

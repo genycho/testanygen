@@ -17,8 +17,8 @@ public class RestAPITestSuiteVO extends TestSuiteVO{
 	private String acceptType = null;
 	private String path = null;
 	private String methodType = null;
-	private List<RestAPIParameterVO> inputParameters = null;	//테스트 케이스에 넣어야 할까? 각 입력 파라미터에 대한. Body에 대한?
-	private Map<String, RestAPIResponseVO> responsesMap = null;
+//	private List<RestAPIParameterVO> inputParameters = null;	//테스트 케이스에 넣어야 할까? 각 입력 파라미터에 대한. Body에 대한?
+//	private Map<String, RestAPIResponseVO> responsesMap = null;
 	
 	String requestBody = null;	//json? only json
 	
@@ -62,39 +62,12 @@ public class RestAPITestSuiteVO extends TestSuiteVO{
 		this.requestBody = requestBody;
 	}
 
-	public List<RestAPIParameterVO> getInputParameters() {
-		return inputParameters;
-	}
-
-	public void setInputParameters(List<RestAPIParameterVO> inputParameters) {
-		this.inputParameters = inputParameters;
-	}
-
 	public String getAcceptType() {
 		return acceptType;
 	}
 
 	public void setAcceptType(String acceptType) {
 		this.acceptType = acceptType;
-	}
-
-	public Map<String, RestAPIResponseVO> getResponsesMap() {
-		return responsesMap;
-	}
-
-	public void setResponsesMap(Map<String, RestAPIResponseVO> responsesMap) {
-		this.responsesMap = responsesMap;
-	}
-	
-	public void addResponseMap(String key, RestAPIResponseVO response) {
-		if(this.responsesMap == null) {
-			this.responsesMap = new HashMap<>();
-		}
-		this.responsesMap.put(key, response);
-	}
-	
-	public RestAPIResponseVO getResponse(String key) {
-		return this.responsesMap.get(key);
 	}
 
 	public String getResource() {

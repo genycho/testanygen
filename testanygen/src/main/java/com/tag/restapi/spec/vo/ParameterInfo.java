@@ -1,5 +1,7 @@
 package com.tag.restapi.spec.vo;
 
+import java.util.Map;
+
 public class ParameterInfo {
 	String name;
 	String inType;//path, query
@@ -7,6 +9,12 @@ public class ParameterInfo {
 	String required = "false";//true,false
 	String format;
 	String description;
+	
+	String example;
+	String defaultValue;
+	
+	Map<String, ParameterInfo> bodyParameterMap;
+	String refBodyModelKey;
 	
 	public String getName() {
 		return name;
@@ -45,5 +53,28 @@ public class ParameterInfo {
 	public void setRequired(String required) {
 		this.required = required;
 	}
-	
+	public Map<String, ParameterInfo> getBodyParameterMap() {
+		return bodyParameterMap;
+	}
+	public void setBodyParameterMap(Map<String, ParameterInfo> bodyParameterMap) {
+		this.bodyParameterMap = bodyParameterMap;
+	}
+	public String getExample() {
+		return example;
+	}
+	public void setExample(String example) {
+		this.example = example;
+	}
+	public String getRefBodyModelKey() {
+		return refBodyModelKey;
+	}
+	public void setRefBodyModelKey(String refBodyModelKey) {
+		this.refBodyModelKey = refBodyModelKey;
+	}
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
+	}
 }

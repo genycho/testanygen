@@ -18,7 +18,7 @@ public class TestCaseVO {
 	private String testCaseType;
 	private int generatedTestLevel = -1;
 
-	private 	String expectedResult;
+	private String expectedResult;
 	private String actualResult;
 	
 	private List<TestStepVO> testStepList;

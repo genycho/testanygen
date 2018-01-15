@@ -45,7 +45,7 @@ public class RestAPISpecAnalyzerTest {
 		assertEquals("This is one of the basic tests only with mandatory input parameters. 선택 입력 값들이 디폴트 값으로 동작하는지 확인합니다", case1.getDescription());
 		assertEquals("정상수행, 선택 입력 값들이 디폴트 값으로 동작하는지 확인합니다", case1.getExpectedResult());
 		assertEquals(1, case1.getGeneratedTestLevel());
-		assertEquals("apiName_MandatoryInput_ok", case1.getName());
+		assertEquals("apiNameTest_MandatoryInput_ok", case1.getName());
 		assertEquals("200", case1.getTestCaseType());
 		assertNull(case1.getTestStepList());
 		
